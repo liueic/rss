@@ -1,0 +1,15 @@
+feeds:
+  - id: example-blog
+    name: Example Blog
+    url: https://example.com/rss.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: tech-news
+    name: Tech News
+    url: https://news.example.com/feed
+    notify: true
+    dedupe_key: link
+    aggregate: true
+    aggregate_window_minutes: 30
