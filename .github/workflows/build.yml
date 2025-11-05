@@ -15,6 +15,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify repository structure
+        run: |
+          echo "Repository root:"
+          pwd
+          echo "Repository contents:"
+          ls -la
+          echo "Checking for cmd directory:"
+          test -d cmd && echo "✓ cmd directory exists" || echo "✗ cmd directory missing"
+          echo "Checking for cmd/rsswatcher:"
+          test -d cmd/rsswatcher && echo "✓ cmd/rsswatcher exists" || echo "✗ cmd/rsswatcher missing"
+          echo "Checking for cmd/rsswatcher/main.go:"
+          test -f cmd/rsswatcher/main.go && echo "✓ main.go exists" || echo "✗ main.go missing"
+          echo "Checking for go.mod:"
+          test -f go.mod && echo "✓ go.mod exists" || echo "✗ go.mod missing"
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -24,8 +41,18 @@ jobs:
 
       - name: Build binary
         run: |
+          echo "Current directory: $(pwd)"
+          echo "Listing files:"
+          ls -la
+          echo "Checking cmd directory:"
+          ls -la cmd/ || echo "cmd directory not found"
+          echo "Checking cmd/rsswatcher directory:"
+          ls -la cmd/rsswatcher/ || echo "cmd/rsswatcher directory not found"
+          echo "Building binary..."
           GOOS=linux GOARCH=amd64 go build -v -o rsswatcher ./cmd/rsswatcher
           chmod +x rsswatcher
+          echo "Build completed. Binary info:"
+          ls -lh rsswatcher
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
