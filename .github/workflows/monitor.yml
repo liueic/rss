@@ -56,7 +56,7 @@ jobs:
             git checkout -b rss-state
             mkdir -p state
             echo '{}' > state/last_states.json
-            git add state/last_states.json
+            git add -f state/last_states.json
             git commit -m "chore: initialize rss-state branch [skip ci]"
             git push -u origin rss-state
             git checkout main
@@ -99,7 +99,7 @@ jobs:
             echo '{}' > state/last_states.json
           fi
           
-          git add state/last_states.json || true
+          git add -f state/last_states.json || true
           if ! git diff --cached --quiet; then
             git commit -m "chore: update rss state [skip ci]"
             git push origin rss-state
