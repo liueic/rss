@@ -70,6 +70,30 @@ jobs:
           # Ensure state directory exists
           mkdir -p state
 
+      - name: Check AI Summarizer Configuration
+        run: |
+          echo "Checking AI summarizer configuration..."
+          if [ -z "${{ secrets.API_ENDPOINT }}" ]; then
+            echo "API_ENDPOINT secret is not set"
+          else
+            echo "API_ENDPOINT is set"
+          fi
+          if [ -z "${{ secrets.API_KEY }}" ]; then
+            echo "API_KEY secret is not set"
+          else
+            echo "API_KEY is set"
+          fi
+          if [ -z "${{ secrets.MODEL_NAME }}" ]; then
+            echo "MODEL_NAME secret is not set"
+          else
+            echo "MODEL_NAME is set"
+          fi
+          if [ -z "${{ secrets.API_ENDPOINT }}" ] || [ -z "${{ secrets.API_KEY }}" ] || [ -z "${{ secrets.MODEL_NAME }}" ]; then
+            echo "AI summarizer will be disabled due to missing secrets"
+          else
+            echo "All AI summarizer secrets are configured"
+          fi
+
       - name: Run RSS Watcher
         env:
           BARK_DEVICE_KEY: ${{ secrets.BARK_DEVICE_KEY }}
