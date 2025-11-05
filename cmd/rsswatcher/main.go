@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"strings"
 	"sync"
 
 	"github.com/rsswatcher/rsswatcher/internal/config"
@@ -52,6 +53,13 @@ func main() {
 	deduper := deduper.New(s)
 	notifier := notifier.NewBark()
 	summarizer := summarizer.New()
+
+	// Log summarizer status
+	if summarizer.IsEnabled() {
+		log.Println("AI summarizer is enabled")
+	} else {
+		log.Println("AI summarizer is disabled (missing API_ENDPOINT, API_KEY, or MODEL_NAME)")
+	}
 
 	// Process feeds concurrently with semaphore
 	sem := make(chan struct{}, maxConcurrent)
@@ -119,18 +127,25 @@ func processFeed(ctx context.Context, feed config.Feed, fetcher *fetcher.Fetcher
 
 	// Generate summaries if enabled
 	if summarizer.IsEnabled() {
-		log.Printf("Generating summaries for %s...", feed.Name)
-		for _, item := range newItems {
+		log.Printf("Generating summaries for %s (%d items)...", feed.Name, len(newItems))
+		successCount := 0
+		for i, item := range newItems {
+			log.Printf("  [%d/%d] Generating summary for: %s", i+1, len(newItems), item.Title)
 			summary, err := summarizer.Summarize(ctx, item.Title, item.Description)
 			if err != nil {
-				log.Printf("Failed to generate summary for %s: %v, using original description", item.Title, err)
+				log.Printf("  ❌ Failed to generate summary for '%s': %v", item.Title, err)
+				log.Printf("  → Using original description instead")
 				// 总结失败时使用原始描述
 				item.Summary = ""
 			} else {
 				item.Summary = summary
-				log.Printf("Generated summary for: %s", item.Title)
+				successCount++
+				log.Printf("  ✅ Generated summary (%d chars): %s", len(summary), truncateSummary(summary, 50))
 			}
 		}
+		log.Printf("Summary generation complete: %d/%d succeeded for %s", successCount, len(newItems), feed.Name)
+	} else {
+		log.Printf("AI summarizer disabled, skipping summary generation for %s", feed.Name)
 	}
 
 	// Send notifications
@@ -152,4 +167,14 @@ func processFeed(ctx context.Context, feed config.Feed, fetcher *fetcher.Fetcher
 			log.Printf("Sent %d notifications for %s", len(newItems), feed.Name)
 		}
 	}
+}
+
+// truncateSummary 截断摘要用于日志显示
+func truncateSummary(s string, maxLen int) string {
+	s = strings.TrimSpace(s)
+	runes := []rune(s)
+	if len(runes) <= maxLen {
+		return s
+	}
+	return string(runes[:maxLen]) + "..."
 }

@@ -132,12 +132,8 @@ func (s *Summarizer) Summarize(ctx context.Context, title, description string) (
 		if json.Unmarshal(body, &errorResp) == nil && errorResp.Error != nil {
 			return "", fmt.Errorf("API error (status %d): %s (type: %s)", resp.StatusCode, errorResp.Error.Message, errorResp.Error.Type)
 		}
-		// 如果无法解析错误响应，返回原始响应
-		bodyStr := string(body)
-		if len(bodyStr) > 500 {
-			bodyStr = bodyStr[:500] + "..."
-		}
-		return "", fmt.Errorf("API returned status %d: %s", resp.StatusCode, bodyStr)
+		// 如果无法解析错误响应，只显示状态码和响应长度，不显示内容以避免泄露敏感信息
+		return "", fmt.Errorf("API returned status %d (response length: %d bytes)", resp.StatusCode, len(body))
 	}
 
 	// 检查响应体是否为空
@@ -148,12 +144,8 @@ func (s *Summarizer) Summarize(ctx context.Context, title, description string) (
 	// 解析响应
 	var apiResp APIResponse
 	if err := json.Unmarshal(body, &apiResp); err != nil {
-		// 提供更详细的错误信息
-		bodyStr := string(body)
-		if len(bodyStr) > 500 {
-			bodyStr = bodyStr[:500] + "..."
-		}
-		return "", fmt.Errorf("failed to parse response (invalid JSON): %w, response body: %s", err, bodyStr)
+		// 不打印响应体内容，避免泄露敏感信息，只显示解析错误和响应长度
+		return "", fmt.Errorf("failed to parse response (invalid JSON): %w (response length: %d bytes)", err, len(body))
 	}
 
 	// 检查错误字段

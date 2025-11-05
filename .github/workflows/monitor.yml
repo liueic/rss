@@ -82,29 +82,47 @@ jobs:
 
       - name: Commit and push state changes to rss-state branch
         run: |
+          # Configure git user
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
           # Save state file before switching branches
           if [ -f state/last_states.json ]; then
             cp state/last_states.json /tmp/last_states.json
+            echo "State file saved to /tmp/last_states.json"
+          else
+            echo "Warning: state/last_states.json not found"
           fi
           
           # Checkout rss-state branch for committing
           git fetch origin rss-state
+          # Suppress warnings about ignored files during checkout
           git checkout rss-state 2>/dev/null || git checkout -b rss-state
+          git config advice.addIgnoredFile false
           
           # Copy state file to rss-state branch
           mkdir -p state
           if [ -f /tmp/last_states.json ]; then
             cp /tmp/last_states.json state/last_states.json
+            echo "State file copied to rss-state branch"
           elif [ ! -f state/last_states.json ]; then
             echo '{}' > state/last_states.json
+            echo "Created empty state file"
           fi
           
-          git add -f state/last_states.json || true
+          # Force add state file (ignore .gitignore rules)
+          git add -f state/last_states.json
+          
+          # Debug: Show what's staged
+          echo "Staged changes:"
+          git diff --cached --stat || echo "No staged changes"
+          
+          # Check if there are any changes to commit
           if ! git diff --cached --quiet; then
             git commit -m "chore: update rss state [skip ci]"
             git push origin rss-state
             echo "State updated and pushed to rss-state branch"
           else
-            echo "No state changes to commit"
+            echo "No state changes to commit (file content is identical to branch)"
           fi
 
