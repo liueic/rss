@@ -1,0 +1,110 @@
+name: RSS Monitor (Go + Bark)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code (main branch)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Go (for fallback build)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache-dependency-path: go.sum
+
+      - name: Download binary artifact from build workflow
+        id: download-artifact
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          name: rsswatcher-binary
+          path: .
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: build.yml
+          if_no_artifact_found: warn
+
+      - name: Build binary if artifact not found
+        if: steps.download-artifact.outcome != 'success'
+        run: |
+          echo "Artifact not found, building binary as fallback..."
+          GOOS=linux GOARCH=amd64 go build -v -o rsswatcher ./cmd/rsswatcher
+          chmod +x rsswatcher
+
+      - name: Make binary executable
+        if: steps.download-artifact.outcome == 'success'
+        run: chmod +x rsswatcher
+
+      - name: Setup state branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Fetch all branches
+          git fetch origin
+          
+          # Check if state branch exists, create if not
+          if ! git ls-remote --heads origin rss-state | grep -q rss-state; then
+            echo "Creating rss-state branch..."
+            git checkout -b rss-state
+            mkdir -p state
+            echo '{}' > state/last_states.json
+            git add state/last_states.json
+            git commit -m "chore: initialize rss-state branch [skip ci]"
+            git push -u origin rss-state
+            git checkout main
+          else
+            echo "rss-state branch exists, fetching state file..."
+            git fetch origin rss-state
+            # Try to get state file from rss-state branch
+            git show origin/rss-state:state/last_states.json > state/last_states.json 2>/dev/null || echo '{}' > state/last_states.json
+          fi
+          
+          # Ensure state directory exists
+          mkdir -p state
+
+      - name: Run RSS Watcher
+        env:
+          BARK_DEVICE_KEY: ${{ secrets.BARK_DEVICE_KEY }}
+          BARK_SERVER: ${{ secrets.BARK_SERVER }}
+          API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
+          API_KEY: ${{ secrets.API_KEY }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME }}
+        run: |
+          ./rsswatcher --config feeds.yaml --state state/last_states.json || true
+
+      - name: Commit and push state changes to rss-state branch
+        run: |
+          # Save state file before switching branches
+          if [ -f state/last_states.json ]; then
+            cp state/last_states.json /tmp/last_states.json
+          fi
+          
+          # Checkout rss-state branch for committing
+          git fetch origin rss-state
+          git checkout rss-state 2>/dev/null || git checkout -b rss-state
+          
+          # Copy state file to rss-state branch
+          mkdir -p state
+          if [ -f /tmp/last_states.json ]; then
+            cp /tmp/last_states.json state/last_states.json
+          elif [ ! -f state/last_states.json ]; then
+            echo '{}' > state/last_states.json
+          fi
+          
+          git add state/last_states.json || true
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: update rss state [skip ci]"
+            git push origin rss-state
+            echo "State updated and pushed to rss-state branch"
+          else
+            echo "No state changes to commit"
+          fi
+

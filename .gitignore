@@ -21,8 +21,9 @@ go.work
 # Binary
 rsswatcher
 
-# State files (optional - uncomment if you don't want to track state in repo)
+# State files - stored in rss-state branch, not in main branch
 # state/*.json
+# Note: State files are managed in the rss-state branch via GitHub Actions
 
 # Test state directory
 state-test/
