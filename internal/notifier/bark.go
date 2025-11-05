@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/rsswatcher/rsswatcher/internal/parser"
 )
@@ -139,8 +140,23 @@ func (b *BarkNotifier) send(title, body string, opts map[string]string) error {
 
 func truncate(s string, maxLen int) string {
 	s = strings.TrimSpace(s)
-	if len(s) <= maxLen {
+	runes := []rune(s)
+	if len(runes) <= maxLen {
 		return s
 	}
-	return s[:maxLen] + "..."
+	return string(runes[:maxLen]) + "..."
+}
+
+func truncateBytes(s string, maxBytes int) string {
+	s = strings.TrimSpace(s)
+	if len(s) <= maxBytes {
+		return s
+	}
+
+	for i := maxBytes; i > 0; i-- {
+		if utf8.ValidString(s[:i]) {
+			return s[:i] + "..."
+		}
+	}
+	return "..."
 }

@@ -2,6 +2,8 @@
 
 A lightweight RSS monitoring service written in Go that runs on GitHub Actions and sends iOS notifications via Bark.
 
+English | [简体中文](README.zh-CN.md)
+
 ## Features
 
 - 🚀 Runs automatically on GitHub Actions (free tier)
@@ -12,6 +14,7 @@ A lightweight RSS monitoring service written in Go that runs on GitHub Actions a
 - 📦 Single static binary, no runtime dependencies
 - 🔧 Easy to configure and maintain
 - 🎯 Support for both individual and aggregated notifications
+- 🌏 Full Unicode support (Chinese, Japanese, etc.)
 
 ## Quick Start
 

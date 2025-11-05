@@ -2,6 +2,8 @@
 
 Get RSS Watcher running in under 5 minutes!
 
+English | [简体中文](QUICKSTART.zh-CN.md)
+
 ## 1. Get Bark Device Key (1 minute)
 
 1. Install [Bark](https://apps.apple.com/app/bark-customed-notifications/id1403753865) on your iPhone

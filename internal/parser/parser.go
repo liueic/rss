@@ -2,6 +2,7 @@ package parser
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"github.com/mmcdole/gofeed"
 )
@@ -53,8 +54,23 @@ func (p *Parser) Parse(data []byte) ([]*Item, error) {
 
 func cleanDescription(desc string) string {
 	desc = strings.TrimSpace(desc)
-	if len(desc) > 200 {
-		desc = desc[:200] + "..."
+	runes := []rune(desc)
+	if len(runes) <= 200 {
+		return desc
 	}
-	return desc
+	return string(runes[:200]) + "..."
+}
+
+func cleanDescriptionBytes(desc string, maxBytes int) string {
+	desc = strings.TrimSpace(desc)
+	if len(desc) <= maxBytes {
+		return desc
+	}
+
+	for i := maxBytes; i > 0; i-- {
+		if utf8.ValidString(desc[:i]) {
+			return desc[:i] + "..."
+		}
+	}
+	return "..."
 }
