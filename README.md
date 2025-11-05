@@ -103,7 +103,6 @@ feeds:
     dedupe_key: guid
     aggregate: false
 ```
-
 #### Aggregated Notifications
 
 ```yaml
@@ -246,6 +245,34 @@ go test ./...
 1. Check that GitHub Actions is enabled in your repository
 2. Verify the cron schedule in `.github/workflows/rss-monitor.yml`
 3. Note that scheduled workflows may be disabled after 60 days of repository inactivity
+
+## AI Summary Feature
+
+RSS Watcher supports AI-powered summaries using large language models. When configured, push notifications will include AI-generated summaries instead of raw RSS descriptions.
+
+### Environment Variables
+
+Set the following environment variables to enable AI summaries:
+
+```bash
+export API_ENDPOINT="https://api.openai.com/v1/chat/completions"
+export API_KEY="your-api-key"
+export MODEL_NAME="gpt-3.5-turbo"
+```
+
+### Supported API Services
+
+- OpenAI API
+- Azure OpenAI Service
+- Other OpenAI-compatible services (e.g., Ollama, vLLM)
+
+### Features
+
+- ✅ Optional: Not enabled by default, fully backward compatible
+- ✅ Auto-fallback: Falls back to original description on API failure
+- ✅ Chinese optimized: Optimized for Chinese summaries
+
+For detailed usage, see: [AI Summary Documentation](docs/AI_SUMMARY.md)
 
 ## Advanced Usage
 

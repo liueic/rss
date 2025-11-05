@@ -13,6 +13,7 @@ type Item struct {
 	Title       string
 	Description string
 	Published   string
+	Summary     string // AI生成的总结，可选
 }
 
 type Parser struct {

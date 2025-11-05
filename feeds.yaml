@@ -1,1 +1,35 @@
-feeds: []
+feeds:
+  - id: JuniorTree
+    name: JuniorTree
+    url: https://www.juniortree.com/rss.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: mmdjiji
+    name: mmdjiji
+    url: https://mmdjiji.com/atom.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: zehao
+    name: zehao
+    url: https://zehao.asia/rss.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: cyaml
+    name: cyaml
+    url: https://blog.cyaml.top/atom.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: axi404
+    name: axi404
+    url: https://axi404.top/rss.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false

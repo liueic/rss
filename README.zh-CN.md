@@ -15,6 +15,7 @@
 - 🔧 易于配置和维护
 - 🎯 支持单条和聚合通知
 - 🌏 完整支持中文内容
+- 🤖 AI 智能总结（可选，支持 OpenAI、Azure OpenAI 等）
 
 ## 快速开始
 
@@ -246,6 +247,49 @@ go test ./...
 1. 检查仓库是否启用了 GitHub Actions
 2. 验证 `.github/workflows/rss-monitor.yml` 中的 cron 调度
 3. 注意：在仓库 60 天无活动后，定时工作流可能会被禁用
+
+## AI 智能总结功能
+
+RSS Watcher 支持使用大语言模型为文章生成智能总结。配置后，推送通知将包含 AI 生成的总结内容。
+
+### 环境变量配置
+
+**方式 1：使用 .env 文件（推荐用于本地开发）**
+
+创建 `.env` 文件并配置：
+
+```bash
+cp .env.example .env
+# 编辑 .env 文件，填入你的配置
+```
+
+```bash
+API_ENDPOINT=https://api.openai.com/v1/chat/completions
+API_KEY=your-api-key
+MODEL_NAME=gpt-3.5-turbo
+```
+
+**方式 2：环境变量（用于生产环境）**
+
+```bash
+export API_ENDPOINT="https://api.openai.com/v1/chat/completions"
+export API_KEY="your-api-key"
+export MODEL_NAME="gpt-3.5-turbo"
+```
+
+### 支持的 API 服务
+
+- OpenAI API
+- Azure OpenAI Service
+- 其他兼容 OpenAI API 格式的服务（如 Ollama、vLLM 等）
+
+### 功能特点
+
+- ✅ 可选功能：未配置时不启用，完全向后兼容
+- ✅ 自动回退：API 调用失败时自动使用原始描述
+- ✅ 中文优化：针对中文总结进行了优化
+
+详细使用说明请参考：[AI 总结功能文档](docs/AI_SUMMARY.md)
 
 ## 高级用法
 

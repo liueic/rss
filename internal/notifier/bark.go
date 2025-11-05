@@ -56,10 +56,17 @@ func (b *BarkNotifier) Notify(feedName string, items []*parser.Item) error {
 
 func (b *BarkNotifier) notifyItem(feedName string, item *parser.Item) error {
 	title := fmt.Sprintf("[%s] %s", feedName, truncate(item.Title, 50))
-	body := truncate(item.Description, 100)
 
+	// 优先使用AI总结，否则使用原始描述
+	body := item.Summary
 	if body == "" {
-		body = "New item published"
+		body = truncate(item.Description, 100)
+		if body == "" {
+			body = "New item published"
+		}
+	} else {
+		// 如果使用了总结，截断到合适长度
+		body = truncate(body, 200)
 	}
 
 	opts := map[string]string{
