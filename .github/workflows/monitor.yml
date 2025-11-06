@@ -66,6 +66,8 @@ jobs:
             git checkout main
           else
             echo "rss-state branch exists, fetching state file..."
+            # Ensure state directory exists before accessing files
+            mkdir -p state
             git fetch origin rss-state
             # Try to get state file from rss-state branch
             git show origin/rss-state:state/last_states.json > state/last_states.json 2>/dev/null || echo '{}' > state/last_states.json
