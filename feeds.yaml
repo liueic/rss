@@ -33,3 +33,24 @@ feeds:
     notify: true
     dedupe_key: guid
     aggregate: false
+
+  - id: CNU
+    name: 首都师范大学生命科学学院
+    url: https://rss.juniortree.com/cnu/smkxxy
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: CNU
+    name: 首都师范大学焦点关注
+    url: https://rss.juniortree.com/cnu/jdxw
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+
+  - id: CNU
+    name: 首都师范大学教务处
+    url: https://rss.juniortree.com/cnu/jwc
+    notify: true
+    dedupe_key: guid
+    aggregate: false
