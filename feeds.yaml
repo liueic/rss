@@ -54,3 +54,11 @@ feeds:
     notify: true
     dedupe_key: guid
     aggregate: false
+    
+  - id: Mokiia
+    name: Mokiia的博客
+    url: https://mokiia1107.pages.dev/atom.xml
+    notify: true
+    dedupe_key: guid
+    aggregate: false
+    
